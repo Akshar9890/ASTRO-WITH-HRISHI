@@ -1,144 +1,185 @@
 /* ── Launcher ──────────────────────────────────────────────────────── */
 .launcher {
-  position: fixed;
-  bottom: 100px;
-  right: 24px;
-  width: 58px; height: 58px;
-  border-radius: 50%;
+  position: fixed; bottom: 100px; right: 24px;
+  width: 58px; height: 58px; border-radius: 50%;
   background: linear-gradient(135deg, #D4AF37, #b8860b);
   border: none; cursor: pointer;
-  font-size: 1.6rem;
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 8px 32px rgba(212,175,55,0.45);
   transition: transform 0.3s, box-shadow 0.3s;
   z-index: 9999;
 }
 .launcher:hover { transform: scale(1.12); box-shadow: 0 12px 40px rgba(212,175,55,0.6); }
-
+.launcherIcon { font-size: 1.5rem; line-height: 1; }
 .launcherBadge {
   position: absolute; top: -4px; right: -4px;
-  background: #e74c3c; color: #fff;
-  font-size: 0.65rem; font-weight: 700;
-  width: 18px; height: 18px;
-  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: #e74c3c; color: #fff; font-size: 0.65rem; font-weight: 700;
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
   border: 2px solid #0a0118;
-  font-family: 'Cinzel', serif;
 }
-
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.5); }
-  50%       { box-shadow: 0 0 0 14px rgba(212,175,55,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.55); }
+  60%       { box-shadow: 0 0 0 14px rgba(212,175,55,0); }
 }
-.pulse { animation: pulse 1.8s ease-in-out infinite; }
+.pulse { animation: pulse 2s ease-in-out infinite; }
 
-/* ── Chat window ───────────────────────────────────────────────────── */
+/* ── Window ────────────────────────────────────────────────────────── */
 .window {
-  position: fixed;
-  bottom: 170px; right: 24px;
-  width: 340px;
-  max-height: 520px;
-  border-radius: 16px;
-  overflow: hidden;
+  position: fixed; bottom: 170px; right: 24px;
+  width: 350px; height: 520px;
+  border-radius: 20px; overflow: hidden;
   display: flex; flex-direction: column;
-  background: #0f0124;
-  border: 1px solid rgba(212,175,55,0.3);
-  box-shadow: 0 24px 60px rgba(0,0,0,0.7), 0 0 40px rgba(212,175,55,0.08);
+  background: #0d011f;
+  border: 1px solid rgba(212,175,55,0.25);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.75), 0 0 60px rgba(212,175,55,0.06);
   z-index: 9998;
-  animation: slideUp 0.3s ease;
+  animation: slideUp 0.28s cubic-bezier(.22,.68,0,1.2);
 }
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* ── Header ────────────────────────────────────────────────────────── */
 .header {
   display: flex; align-items: center; gap: 12px;
-  padding: 14px 16px;
-  background: linear-gradient(135deg, #1a0535, #0f0124);
-  border-bottom: 1px solid rgba(212,175,55,0.2);
+  padding: 14px 16px; flex-shrink: 0;
+  background: linear-gradient(135deg, #1d0640, #0d011f);
+  border-bottom: 1px solid rgba(212,175,55,0.15);
 }
 .avatar {
-  width: 40px; height: 40px;
-  border-radius: 50%; background: linear-gradient(135deg, #D4AF37, #b8860b);
+  width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(135deg, #D4AF37, #b8860b);
   display: flex; align-items: center; justify-content: center;
   font-size: 1.3rem; flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(212,175,55,0.4);
 }
+.headerInfo { flex: 1; }
 .botName { font-family: 'Cinzel', serif; font-size: 0.85rem; color: #D4AF37; letter-spacing: 1px; }
 .status  { font-size: 0.65rem; color: #25D366; margin-top: 2px; }
 .resetBtn {
-  margin-left: auto; background: transparent; border: 1px solid rgba(212,175,55,0.3);
-  color: #D4AF37; border-radius: 50%; width: 28px; height: 28px; cursor: pointer;
-  font-size: 1rem; display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
+  background: transparent; border: 1px solid rgba(212,175,55,0.25);
+  color: rgba(212,175,55,0.7); border-radius: 50%;
+  width: 28px; height: 28px; cursor: pointer; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; flex-shrink: 0;
 }
-.resetBtn:hover { background: rgba(212,175,55,0.1); }
+.resetBtn:hover { background: rgba(212,175,55,0.1); color: #D4AF37; }
 
 /* ── Body ──────────────────────────────────────────────────────────── */
 .body {
-  flex: 1; overflow-y: auto;
-  padding: 16px; display: flex; flex-direction: column; gap: 10px;
-  scrollbar-width: thin; scrollbar-color: rgba(212,175,55,0.2) transparent;
+  flex: 1; overflow-y: auto; padding: 16px 14px;
+  display: flex; flex-direction: column; gap: 8px;
+  scrollbar-width: thin; scrollbar-color: rgba(212,175,55,0.15) transparent;
 }
-.msg { display: flex; flex-direction: column; max-width: 85%; }
-.bot  { align-self: flex-start; }
-.user { align-self: flex-end; }
 
+/* ── Message rows ──────────────────────────────────────────────────── */
+.botRow {
+  display: flex; align-items: flex-end; gap: 8px;
+  animation: fadeIn 0.25s ease;
+}
+.userRow {
+  display: flex; justify-content: flex-end;
+  animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.botAvatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: linear-gradient(135deg, #D4AF37, #b8860b);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; flex-shrink: 0;
+}
 .bubble {
   display: inline-block; padding: 10px 14px;
-  border-radius: 14px; font-size: 0.8rem; line-height: 1.55;
-  white-space: pre-line;
+  border-radius: 16px; font-size: 0.78rem; line-height: 1.6;
+  max-width: 78%; white-space: pre-line; word-break: break-word;
 }
-.bot .bubble {
+.botBubble {
   background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(212,175,55,0.15);
-  color: #F5EDD6; border-top-left-radius: 4px;
+  border: 1px solid rgba(212,175,55,0.12);
+  color: #F5EDD6; border-bottom-left-radius: 4px;
 }
-.user .bubble {
+.userBubble {
   background: linear-gradient(135deg, #D4AF37, #b8860b);
-  color: #0a0118; font-weight: 600; border-top-right-radius: 4px;
+  color: #0a0118; font-weight: 600;
+  border-bottom-right-radius: 4px;
 }
 
+/* ── CTA button ────────────────────────────────────────────────────── */
 .ctaBtn {
-  display: inline-block; margin-top: 8px;
+  display: inline-block; padding: 9px 18px; border-radius: 8px;
   background: linear-gradient(135deg, #25D366, #128C7E);
   color: #fff; font-family: 'Cinzel', serif;
-  font-size: 0.7rem; letter-spacing: 1px;
-  padding: 8px 16px; border-radius: 6px;
-  text-decoration: none; text-align: center;
-  transition: opacity 0.2s;
+  font-size: 0.7rem; letter-spacing: 0.8px; text-decoration: none;
+  transition: opacity 0.2s; max-width: 78%;
 }
 .ctaBtn:hover { opacity: 0.85; }
 
 /* ── Quick replies ─────────────────────────────────────────────────── */
-.replies {
-  padding: 10px 12px;
+.quickWrap {
   display: flex; flex-wrap: wrap; gap: 6px;
-  border-top: 1px solid rgba(212,175,55,0.1);
-  background: rgba(255,255,255,0.02);
+  padding-left: 34px; animation: fadeIn 0.3s ease;
 }
-.reply {
-  background: transparent;
-  border: 1px solid rgba(212,175,55,0.35);
+.quickBtn {
+  background: transparent; border: 1px solid rgba(212,175,55,0.35);
   color: #D4AF37; border-radius: 20px;
-  padding: 5px 12px; font-size: 0.7rem;
+  padding: 5px 12px; font-size: 0.68rem;
   cursor: pointer; font-family: 'Cinzel', serif;
-  letter-spacing: 0.5px; transition: all 0.2s;
-  white-space: nowrap;
+  letter-spacing: 0.5px; transition: all 0.2s; white-space: nowrap;
 }
-.reply:hover { background: rgba(212,175,55,0.12); border-color: #D4AF37; }
+.quickBtn:hover { background: rgba(212,175,55,0.12); border-color: #D4AF37; }
 
-/* ── Footer ────────────────────────────────────────────────────────── */
-.footer {
-  padding: 8px 16px;
-  font-size: 0.6rem; color: rgba(212,175,55,0.5);
-  text-align: center; letter-spacing: 1px;
-  font-family: 'Cinzel', serif;
-  border-top: 1px solid rgba(212,175,55,0.1);
+/* ── Typing indicator ──────────────────────────────────────────────── */
+.typing {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 10px 16px; border-radius: 16px; border-bottom-left-radius: 4px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(212,175,55,0.12);
+  height: 36px;
 }
+.typing span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(212,175,55,0.6); display: inline-block;
+  animation: bounce 1.2s infinite ease-in-out;
+}
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+  40%           { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ── Input row ─────────────────────────────────────────────────────── */
+.inputRow {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; flex-shrink: 0;
+  background: rgba(255,255,255,0.03);
+  border-top: 1px solid rgba(212,175,55,0.12);
+}
+.input {
+  flex: 1; background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(212,175,55,0.2); border-radius: 24px;
+  padding: 9px 16px; color: #F5EDD6; font-size: 0.8rem;
+  outline: none; transition: border-color 0.2s;
+  font-family: 'Cormorant Garamond', serif;
+}
+.input::placeholder { color: rgba(245,237,214,0.35); }
+.input:focus { border-color: rgba(212,175,55,0.5); }
+.sendBtn {
+  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #D4AF37, #b8860b);
+  border: none; color: #0a0118; font-size: 1rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; padding-left: 2px;
+}
+.sendBtn:hover:not(:disabled) { transform: scale(1.08); }
+.sendBtn:disabled { opacity: 0.35; cursor: not-allowed; }
 
 /* ── Mobile ────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
-  .window { width: calc(100vw - 32px); right: 16px; bottom: 160px; }
-  .launcher { right: 16px; bottom: 90px; }
+  .window { width: calc(100vw - 24px); right: 12px; bottom: 155px; height: 480px; }
+  .launcher { right: 16px; bottom: 88px; }
 }
