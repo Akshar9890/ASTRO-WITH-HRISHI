@@ -7,6 +7,8 @@ export default function Cursor() {
   const trailPos = useRef({ x: -100, y: -100 });
 
   useEffect(() => {
+    document.body.classList.add('custom-cursor');
+
     const onMove = (e) => {
       pos.current = { x: e.clientX, y: e.clientY };
     };
@@ -49,6 +51,7 @@ export default function Cursor() {
     });
 
     return () => {
+      document.body.classList.remove('custom-cursor');
       window.removeEventListener('mousemove', onMove);
       cancelAnimationFrame(animId);
     };

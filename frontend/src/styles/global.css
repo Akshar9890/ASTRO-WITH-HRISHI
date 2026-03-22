@@ -23,9 +23,12 @@ body {
   color: var(--white);
   font-family: 'Cormorant Garamond', serif;
   overflow-x: hidden;
-  cursor: none;
   -webkit-font-smoothing: antialiased;
 }
+
+/* Custom cursor only on home page */
+body.custom-cursor { cursor: none; }
+body.custom-cursor * { cursor: none; }
 
 /* ── Custom cursor ─────────────────────────────────────────────────────────── */
 .cursor {
@@ -160,6 +163,6 @@ main { animation: fadeInUp 0.6s ease both; }
 
 /* ── Mobile ────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  body { cursor: auto; }
+  body.custom-cursor { cursor: auto; }
   .cursor, .cursor-trail { display: none; }
 }
