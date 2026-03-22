@@ -8,6 +8,7 @@ import Shop from '../components/Shop';
 import Testimonials from '../components/Testimonials';
 import ConsultForm from '../components/ConsultForm';
 import Footer from '../components/Footer';
+import ChatBot from '../components/ChatBot';
 import styles from './Home.module.css';
 
 export default function Home() {
@@ -91,6 +92,7 @@ export default function Home() {
       {/* Floating buttons */}
       <a href="https://wa.me/918799534254" className={styles.floatWa} target="_blank" rel="noreferrer">💬</a>
       <a href="tel:+918799534254" className={styles.floatCall}>📞</a>
+      <ChatBot />
     </>
   );
 }
