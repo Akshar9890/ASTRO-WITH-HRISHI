@@ -1,0 +1,11 @@
+.footer { background: var(--deep-purple); border-top: 1px solid rgba(212,175,55,0.1); padding: 60px; text-align: center; position: relative; z-index: 1; }
+.logo { margin-bottom: 24px; display: flex; justify-content: center; }
+.logoImg { height: 72px; width: auto; object-fit: contain; }
+.social { display: flex; gap: 20px; justify-content: center; margin-bottom: 32px; }
+.socialBtn { width: 44px; height: 44px; border: 1px solid rgba(212,175,55,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; transition: all 0.3s; text-decoration: none; }
+.socialBtn:hover { border-color: var(--gold); box-shadow: var(--glow); transform: translateY(-4px); }
+.links { display: flex; gap: 32px; justify-content: center; list-style: none; margin-bottom: 32px; flex-wrap: wrap; }
+.links a { font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 2px; color: var(--white-dim); text-decoration: none; text-transform: uppercase; transition: color 0.3s; }
+.links a:hover { color: var(--gold); }
+.copy { font-size: 0.85rem; color: rgba(245,237,214,0.3); font-style: italic; }
+@media (max-width: 768px) { .footer { padding: 40px 20px; } }
