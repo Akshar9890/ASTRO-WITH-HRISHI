@@ -46,23 +46,23 @@ export default function Hero() {
       <div className={`${styles.orb} ${styles.orb3}`}/>
 
       <div className={styles.content}>
-        <div className={styles.badge}>✦ 10+ Years of Cosmic Wisdom ✦</div>
-        <h1>Astro With<br /><span>Hrishi</span></h1>
-        <p className={styles.sub}>Expert Vedic Astrology · Sacred Jewels · Divine Guidance</p>
+        <div className={styles.badge}>🔥 Your Kundli is Our Responsibility 🔥</div>
+        <h1>Unlock Your<br /><span>Destiny</span></h1>
+        <p className={styles.sub}>100% Result-Oriented Astrology · Numerology · Life Coaching</p>
 
         <div className={styles.btns}>
           <a href="https://wa.me/918799534254?text=Namaste!%20I%20want%20an%20astrology%20consultation"
              className="btn-primary" target="_blank" rel="noreferrer">
-            💬 Chat on WhatsApp
+            💬 WhatsApp Now
           </a>
           <a href="#contact" className="btn-outline">🔮 Book Consultation</a>
         </div>
 
-        <div className={styles.urgency}>⚡ LIMITED SLOTS AVAILABLE TODAY — BOOK BEFORE MIDNIGHT</div>
+        <div className={styles.urgency}>⚡ LIMITED SLOTS TODAY — DON'T WAIT FOR TIME TO CHANGE, CHANGE YOUR TIME</div>
         <div className="divider" />
 
         <div className={styles.stats}>
-          {[['10+','Years Exp'],['5000+','Lives Changed'],['98%','Accuracy'],['4.9★','Rating']].map(([n,l]) => (
+          {[['1000+','Happy Clients'],['98%','Accuracy'],['10+','Years Exp'],['4.9★','Rating']].map(([n,l]) => (
             <div key={l} className={styles.stat}>
               <span className={styles.statNum}>{n}</span>
               <span className={styles.statLabel}>{l}</span>

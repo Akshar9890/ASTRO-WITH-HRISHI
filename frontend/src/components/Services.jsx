@@ -2,12 +2,12 @@ import { useEffect, useRef } from 'react';
 import styles from './Services.module.css';
 
 const SERVICES = [
-  { icon: '🔮', title: 'Kundli & Birth Chart',      desc: 'Deep analysis of your birth chart to reveal life\'s hidden patterns and planetary influences.', tag: 'Most Popular' },
-  { icon: '💑', title: 'Love & Relationship',        desc: 'Heal broken relationships, attract soulmates, and strengthen your love life with cosmic guidance.' },
-  { icon: '💍', title: 'Marriage & Compatibility',   desc: 'Kundli matching, auspicious muhurat, and marriage problem solutions.' },
-  { icon: '🌟', title: 'Career & Business',          desc: 'Find your dharmic career path, predict business growth, and remove professional obstacles.' },
-  { icon: '🧿', title: 'Vastu & Remedies',           desc: 'Gemstone recommendations, yantras, mantras, and Vastu corrections for prosperity.' },
-  { icon: '📿', title: 'Numerology & Tarot',         desc: 'Unlock your life path number and receive intuitive tarot readings for guidance.' },
+  { icon: '🔮', title: 'Kundli Analysis',          desc: 'Detailed birth chart reading for career, marriage, finance & health — with accurate predictions and real solutions.', tag: 'Most Popular' },
+  { icon: '📱', title: 'Mobile Numerology',          desc: 'Correct your mobile number to attract success, positive energy & financial abundance into your life.' },
+  { icon: '💼', title: 'Business & Career Guidance', desc: 'Perfect timing & direction for career growth, job change & business success — backed by Vedic analysis.' },
+  { icon: '❤️', title: 'Relationship & Marriage',    desc: 'Solve conflicts, attract the right partner, and build lasting harmony through cosmic guidance.' },
+  { icon: '🧠', title: 'Life Coaching',              desc: 'Gain clarity, confidence & decision-making power with astrology-based life coaching sessions.' },
+  { icon: '✨', title: 'Powerful Remedies',          desc: 'Simple, practical & effective remedies — no complicated rituals. Results guaranteed or money back.', tag: 'Money-Back' },
 ];
 
 export default function Services() {
