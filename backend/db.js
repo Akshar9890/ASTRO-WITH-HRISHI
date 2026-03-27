@@ -2,10 +2,15 @@ const initSqlJs = require('sql.js');
 const fs   = require('fs');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, 'astroveda.db');
+// On Render, set DB_DIR=/data (persistent disk). Locally uses __dirname.
+const DB_DIR  = process.env.DB_DIR || __dirname;
+const DB_PATH = path.join(DB_DIR, 'astroveda.db');
 
-let db = null;
-let dbReady = false;
+// Ensure directory exists
+if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
+
+let db       = null;
+let dbReady  = false;
 
 async function getDb() {
   if (dbReady) return db;
