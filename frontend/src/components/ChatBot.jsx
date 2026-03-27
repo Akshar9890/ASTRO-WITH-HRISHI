@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import styles from './ChatBot.module.css';
+import { getBookedSlots, createAppointment } from '../api/client';
 
-const PHONE = '918799534254';
+const PHONE = '919558569555';
 
 /* ── Helpers ─────────────────────────────────────────────────── */
 const TIME_SLOTS = ['9:00 AM','10:00 AM','11:00 AM','12:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM'];
@@ -76,6 +77,8 @@ export default function ChatBot() {
   const [pulse, setPulse] = useState(true);
   // Booking state
   const [booking, setBooking] = useState(null); // null | { step, name, date, time }
+  const [bookedSlots, setBookedSlots] = useState([]); // slots already taken for selected date
+  const [loadingSlots, setLoadingSlots] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -102,7 +105,7 @@ export default function ChatBot() {
 
   /* ── Start booking flow ── */
   const startBooking = () => {
-    setBooking({ step: 'name', name: '', date: '', time: '' });
+    setBooking({ step: 'name', name: '', phone: '', dob: '', date: '', time: '' });
     setTyping(true);
     setTimeout(() => {
       setTyping(false);
@@ -117,49 +120,95 @@ export default function ChatBot() {
   const handleNameSubmit = (name) => {
     if (!name.trim()) return;
     setMessages(prev => [...prev, { from: 'user', text: name }]);
-    setBooking(b => ({ ...b, step: 'date', name: name.trim() }));
+    setBooking(b => ({ ...b, step: 'phone', name: name.trim() }));
     setTyping(true);
     setTimeout(() => {
       setTyping(false);
-      setMessages(prev => [...prev, { from: 'bot', text: `✨ Namaste ${name.trim()}! Please choose your preferred date:`, dateSelector: true }]);
-    }, 800);
-  };
-
-  const handleDateSelect = (date) => {
-    setMessages(prev => [...prev, { from: 'user', text: `📅 ${date}` }]);
-    setBooking(b => ({ ...b, step: 'time', date }));
-    setTyping(true);
-    setTimeout(() => {
-      setTyping(false);
-      setMessages(prev => [...prev, { from: 'bot', text: `Great! Now choose a time slot for ${date}:`, timeSelector: true }]);
+      setMessages(prev => [...prev, { from: 'bot', text: `✨ Namaste ${name.trim()}! 📱 What\'s your phone number?` }]);
     }, 700);
   };
 
-  const handleTimeSelect = (time) => {
-    setBooking(b => {
-      const appt = { ...b, step: 'done', time };
-      const waText = `Namaste! I want to book a consultation.\n\nName: ${appt.name}\nDate: ${appt.date}\nTime: ${time}\n\nPlease confirm my appointment. 🙏`;
-      setMessages(prev => [
-        ...prev,
-        { from: 'user', text: `⏰ ${time}` },
-      ]);
-      setTyping(true);
-      setTimeout(() => {
+  const handlePhoneSubmit = (phone) => {
+    if (!phone.trim()) return;
+    setMessages(prev => [...prev, { from: 'user', text: phone }]);
+    setBooking(b => ({ ...b, step: 'dob', phone: phone.trim() }));
+    setTyping(true);
+    setTimeout(() => {
+      setTyping(false);
+      setMessages(prev => [...prev, { from: 'bot', text: '🎂 Please enter your Date of Birth (DD/MM/YYYY):' }]);
+    }, 700);
+  };
+
+  const handleDobSubmit = (dob) => {
+    if (!dob.trim()) return;
+    setMessages(prev => [...prev, { from: 'user', text: dob }]);
+    setBooking(b => ({ ...b, step: 'date', dob: dob.trim() }));
+    setTyping(true);
+    setTimeout(() => {
+      setTyping(false);
+      setMessages(prev => [...prev, { from: 'bot', text: '📅 Please choose your preferred date:', dateSelector: true }]);
+    }, 700);
+  };
+
+
+  const handleDateSelect = (dateLabel, dateValue) => {
+    setMessages(prev => [...prev, { from: 'user', text: `📅 ${dateLabel}` }]);
+    setBooking(b => ({ ...b, step: 'time', date: dateLabel, dateValue }));
+    setBookedSlots([]);
+    setLoadingSlots(true);
+    setTyping(true);
+    // Fetch booked slots for this date
+    getBookedSlots(dateValue)
+      .then(res => setBookedSlots(res.data.bookedSlots || []))
+      .catch(() => setBookedSlots([]))
+      .finally(() => {
+        setLoadingSlots(false);
         setTyping(false);
+        setMessages(prev => [...prev, { from: 'bot', text: `Great! Now choose a time slot for ${dateLabel}:`, timeSelector: true }]);
+      });
+  };
+
+  const handleTimeSelect = (time) => {
+    // Read current booking from closure — do NOT put async work inside a state updater
+    const appt = { ...booking, step: 'confirming', time };
+    setBooking(appt);
+    setMessages(prev => [...prev, { from: 'user', text: `⏰ ${time}` }]);
+    setTyping(true);
+
+    const waText = `Namaste! I want to book a consultation.\n\nName: ${appt.name}\nPhone: ${appt.phone}\nDOB: ${appt.dob}\nDate: ${appt.date}\nTime: ${time}\n\nPlease confirm my appointment. 🙏`;
+
+    createAppointment({
+      name: appt.name,
+      phone: appt.phone || '',
+      appt_date: appt.dateValue || appt.date,
+      appt_time: time,
+    }).then(() => {
+      setBookedSlots(prev => [...prev, time]);
+      setTyping(false);
+      setMessages(prev => [...prev,
+        { from: 'bot', text: `✅ Appointment Booked!\n\n👤 ${appt.name}\n📱 ${appt.phone}\n🎂 DOB: ${appt.dob}\n📅 ${appt.date}\n⏰ ${time}\n🔒 Slot locked for you!` },
+      ]);
+      setTimeout(() => {
         setMessages(prev => [...prev,
-          { from: 'bot', text: `✅ Appointment Summary:\n\n👤 Name: ${appt.name}\n📅 Date: ${appt.date}\n⏰ Time: ${time}` },
+          { from: 'bot', text: '🔥 Tap below to confirm with Hrishi on WhatsApp. He will send a reminder 30 min before!' },
+          { from: 'bot', cta: true, label: '💬 Confirm Appointment on WhatsApp', url: `https://wa.me/${PHONE}?text=${encodeURIComponent(waText)}` },
         ]);
-        setTimeout(() => {
-          setMessages(prev => [...prev,
-            { from: 'bot', text: '🔥 Tap below to confirm with Hrishi on WhatsApp. He will confirm your slot within 30 minutes!' },
-            { from: 'bot', cta: true, label: '💬 Confirm Appointment on WhatsApp', url: `https://wa.me/${PHONE}?text=${encodeURIComponent(waText)}` },
-          ]);
-          setBooking(null);
-        }, 700);
-      }, 900);
-      return appt;
+        setBooking(null);
+      }, 700);
+    }).catch(err => {
+      setTyping(false);
+      // 409 = slot taken (silently refresh slots); anything else = show error
+      if (err?.response?.status !== 409) {
+        setMessages(prev => [...prev, { from: 'bot', text: '❌ Could not save booking. Please try again.' }]);
+      }
+      // Re-fetch so locked slots are up-to-date
+      if (appt.dateValue) {
+        getBookedSlots(appt.dateValue).then(r => setBookedSlots(r.data.bookedSlots || [])).catch(() => {});
+      }
+      setBooking(b => ({ ...b, step: 'time' }));
     });
   };
+
 
   /* ── Main send handler ── */
   const sendMessage = (text) => {
@@ -180,6 +229,9 @@ export default function ChatBot() {
   const reset = () => { setMessages(INITIAL); setTyping(false); setInput(''); setBooking(null); };
 
   const days = getNext7Days();
+
+  // Date value map for slot fetching (label -> value)
+  const dayValueMap = Object.fromEntries(days.map(d => [d.label, d.value]));
 
   return (
     <>
@@ -233,7 +285,7 @@ export default function ChatBot() {
                 {msg.from === 'bot' && msg.dateSelector && booking?.step === 'date' && (
                   <div className={styles.dateGrid}>
                     {days.map(d => (
-                      <button key={d.value} className={styles.dateBtn} onClick={() => handleDateSelect(d.label)}>
+                      <button key={d.value} className={styles.dateBtn} onClick={() => handleDateSelect(d.label, d.value)}>
                         {d.label}
                       </button>
                     ))}
@@ -242,9 +294,24 @@ export default function ChatBot() {
                 {/* Inline time selector */}
                 {msg.from === 'bot' && msg.timeSelector && booking?.step === 'time' && (
                   <div className={styles.timeGrid}>
-                    {TIME_SLOTS.map(t => (
-                      <button key={t} className={styles.timeBtn} onClick={() => handleTimeSelect(t)}>{t}</button>
-                    ))}
+                    {loadingSlots ? (
+                      <span className={styles.slotsLoading}>Loading slots… ✨</span>
+                    ) : (
+                      TIME_SLOTS.map(t => {
+                        const isLocked = bookedSlots.includes(t);
+                        return (
+                          <button
+                            key={t}
+                            className={`${styles.timeBtn} ${isLocked ? styles.timeBtnLocked : ''}`}
+                            onClick={() => !isLocked && handleTimeSelect(t)}
+                            disabled={isLocked}
+                            title={isLocked ? 'Slot already booked' : ''}
+                          >
+                            {isLocked ? `🔒 ${t}` : t}
+                          </button>
+                        );
+                      })
+                    )}
                   </div>
                 )}
               </div>
@@ -259,9 +326,13 @@ export default function ChatBot() {
             <div ref={bottomRef} />
           </div>
 
-          {/* Input / Name step */}
+          {/* Input area — changes by booking step */}
           {booking?.step === 'name' ? (
-            <NameInput onSubmit={handleNameSubmit} />
+            <TextInput key="name" placeholder="Enter your name..." onSubmit={handleNameSubmit} />
+          ) : booking?.step === 'phone' ? (
+            <TextInput key="phone" placeholder="Enter your phone number..." type="tel" onSubmit={handlePhoneSubmit} />
+          ) : booking?.step === 'dob' ? (
+            <TextInput key="dob" placeholder="DD/MM/YYYY" onSubmit={handleDobSubmit} />
           ) : (
             <div className={styles.inputRow}>
               <input ref={inputRef} className={styles.input} value={input}
@@ -276,18 +347,51 @@ export default function ChatBot() {
   );
 }
 
-function NameInput({ onSubmit }) {
+function TextInput({ placeholder, type = 'text', onSubmit }) {
   const [val, setVal] = useState('');
-  const ref = useRef(null);
-  useEffect(() => { ref.current?.focus(); }, []);
+  const inputRef = useRef(null);
+  const submitRef = useRef(onSubmit);
+  // Keep ref fresh without causing re-renders
+  submitRef.current = onSubmit;
+
+  useEffect(() => { inputRef.current?.focus(); }, []); // focus only on mount
+
+  const handleSubmit = () => {
+    if (val.trim()) {
+      const v = val;
+      setVal(''); // clear immediately so the input feels responsive
+      submitRef.current(v);
+    }
+  };
+
+  const inputStyle = {
+    flex: 1, background: 'rgba(255,255,255,0.06)',
+    border: '1px solid rgba(212,175,55,0.3)', borderRadius: 24,
+    padding: '9px 16px', color: '#F5EDD6', fontSize: '0.8rem',
+    outline: 'none', fontFamily: 'Cormorant Garamond, serif',
+  };
+  const btnStyle = {
+    width: 38, height: 38, borderRadius: '50%',
+    background: 'linear-gradient(135deg,#D4AF37,#b8860b)',
+    border: 'none', color: '#0a0118', fontSize: '1rem',
+    cursor: val.trim() ? 'pointer' : 'not-allowed',
+    opacity: val.trim() ? 1 : 0.35,
+    display: 'flex', alignItems: 'center', justifyContent: 'center', paddingLeft: 2,
+  };
   return (
     <div style={{ display: 'flex', gap: 8, padding: '10px 12px', borderTop: '1px solid rgba(212,175,55,0.12)', background: 'rgba(255,255,255,0.02)' }}>
-      <input ref={ref} style={{ flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(212,175,55,0.3)', borderRadius: 24, padding: '9px 16px', color: '#F5EDD6', fontSize: '0.8rem', outline: 'none', fontFamily: 'Cormorant Garamond, serif' }}
-        value={val} onChange={e => setVal(e.target.value)}
-        onKeyDown={e => { if (e.key === 'Enter') onSubmit(val); }}
-        placeholder="Enter your name..." />
-      <button style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,#D4AF37,#b8860b)', border: 'none', color: '#0a0118', fontSize: '1rem', cursor: val.trim() ? 'pointer' : 'not-allowed', opacity: val.trim() ? 1 : 0.35, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingLeft: 2 }}
-        onClick={() => onSubmit(val)} disabled={!val.trim()}>➤</button>
+      <input
+        ref={inputRef}
+        style={inputStyle}
+        type={type}
+        value={val}
+        onChange={e => setVal(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Enter') handleSubmit(); }}
+        placeholder={placeholder}
+      />
+      <button style={btnStyle} onClick={handleSubmit} disabled={!val.trim()}>➤</button>
     </div>
   );
 }
+
+

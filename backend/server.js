@@ -8,10 +8,11 @@ const rateLimit = require('express-rate-limit');
 const path      = require('path');
 const fs        = require('fs');
 
-const consultationsRouter = require('./routes/consultations');
-const ordersRouter        = require('./routes/orders');
-const adminRouter         = require('./routes/admin');
-const analyticsRouter     = require('./routes/analytics');
+const consultationsRouter  = require('./routes/consultations');
+const ordersRouter         = require('./routes/orders');
+const adminRouter          = require('./routes/admin');
+const analyticsRouter      = require('./routes/analytics');
+const appointmentsRouter   = require('./routes/appointments');
 
 const app  = express();
 const PORT = process.env.PORT || 5001;
@@ -48,10 +49,11 @@ app.use('/api/consultations', formLimiter);
 app.use('/api/orders', formLimiter);
 
 // ── Routes ────────────────────────────────────────────────────────────────────
-app.use('/api/consultations', consultationsRouter);
-app.use('/api/orders',        ordersRouter);
-app.use('/api/admin',         adminRouter);   // NO rate limit on admin
-app.use('/api/analytics',     analyticsRouter);
+app.use('/api/consultations',  consultationsRouter);
+app.use('/api/orders',         ordersRouter);
+app.use('/api/admin',          adminRouter);   // NO rate limit on admin
+app.use('/api/analytics',      analyticsRouter);
+app.use('/api/appointments',   appointmentsRouter);
 
 // ── Serve built frontend (production) ────────────────────────────────────────
 const PUBLIC_DIR = path.join(__dirname, 'public');

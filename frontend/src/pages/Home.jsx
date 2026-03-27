@@ -8,6 +8,7 @@ import Shop from '../components/Shop';
 import Testimonials from '../components/Testimonials';
 import ConsultForm from '../components/ConsultForm';
 import Footer from '../components/Footer';
+import Location from '../components/Location';
 import ChatBot from '../components/ChatBot';
 import styles from './Home.module.css';
 
@@ -74,6 +75,7 @@ export default function Home() {
 
         <Testimonials />
         <ConsultForm />
+        <Location />
 
         {/* Big CTA */}
         <section className={styles.cta}>
@@ -81,8 +83,8 @@ export default function Home() {
           <p>Stop guessing your future — start controlling it.</p>
           <p style={{ fontSize: '0.85rem', opacity: 0.75, marginBottom: '8px' }}>✅ 100% Result-Focused &nbsp;|&nbsp; 💰 Money-Back Challenge &nbsp;|&nbsp; 🚀 Fast Results</p>
           <div className={styles.ctaBtns}>
-            <a href="https://wa.me/918799534254" className="btn-primary" target="_blank" rel="noreferrer">💬 WhatsApp Now</a>
-            <a href="tel:+918799534254" className="btn-outline">📞 Call Now</a>
+            <a href="https://wa.me/919558569555" className="btn-primary" target="_blank" rel="noreferrer">💬 WhatsApp Now</a>
+            <a href="tel:+919558569555" className="btn-outline">📞 Call Now</a>
           </div>
         </section>
       </main>
@@ -90,8 +92,8 @@ export default function Home() {
       <Footer />
 
       {/* Floating buttons */}
-      <a href="https://wa.me/918799534254" className={styles.floatWa} target="_blank" rel="noreferrer">💬</a>
-      <a href="tel:+918799534254" className={styles.floatCall}>📞</a>
+      <a href="https://wa.me/919558569555" className={styles.floatWa} target="_blank" rel="noreferrer">💬</a>
+      <a href="tel:+919558569555" className={styles.floatCall}>📞</a>
       <ChatBot />
     </>
   );

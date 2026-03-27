@@ -208,7 +208,31 @@
   cursor: pointer; font-family: 'Cinzel', serif;
   letter-spacing: 0.2px; transition: all 0.2s; text-align: center;
 }
-.timeBtn:hover { background: rgba(212,175,55,0.18); border-color: #D4AF37; color: #D4AF37; transform: translateY(-1px); }
+.timeBtn:hover:not(:disabled) { background: rgba(212,175,55,0.18); border-color: #D4AF37; color: #D4AF37; transform: translateY(-1px); }
+
+/* Locked (already-booked) slot */
+.timeBtnLocked {
+  background: rgba(255,255,255,0.02) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: rgba(255,255,255,0.25) !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  text-decoration: line-through;
+  font-size: 0.6rem;
+}
+.timeBtnLocked:hover { background: rgba(255,255,255,0.02) !important; }
+
+/* Loading slots placeholder */
+.slotsLoading {
+  grid-column: 1 / -1;
+  color: rgba(212,175,55,0.5);
+  font-size: 0.72rem;
+  font-family: 'Cinzel', serif;
+  text-align: center;
+  padding: 8px 0;
+  animation: fadeIn 0.3s ease;
+}
+
 
 /* ── Mobile ────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {

@@ -120,7 +120,7 @@ export default function CartDrawer() {
             <h3>Order #{orderId} Confirmed!</h3>
             <p>We'll contact you on WhatsApp to confirm delivery details.</p>
             <a
-              href={`https://wa.me/918799534254?text=Hi!%20My%20order%20ID%20is%20%23${orderId}`}
+              href={`https://wa.me/919558569555?text=Hi!%20My%20order%20ID%20is%20%23${orderId}`}
               className="btn-primary" target="_blank" rel="noreferrer"
             >
               💬 Chat on WhatsApp

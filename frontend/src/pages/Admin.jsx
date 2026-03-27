@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { adminStats, adminConsultations, adminOrders, updateConsultation, updateOrder } from '../api/client';
+import { adminStats, adminConsultations, adminOrders, adminAppointments,
+         updateConsultation, updateOrder, updateAppointment,
+         deleteConsultation, deleteOrder, deleteAppointment } from '../api/client';
 import toast from 'react-hot-toast';
 import styles from './Admin.module.css';
 
 const STATUS_COLORS = {
   new: '#D4AF37', contacted: '#25D366', closed: '#888',
   pending: '#D4AF37', confirmed: '#25D366', shipped: '#4B9CD3', delivered: '#888',
+  cancelled: '#e74c3c',
 };
 
 export default function Admin() {
@@ -15,8 +18,10 @@ export default function Admin() {
   const [stats, setStats]       = useState(null);
   const [leads, setLeads]       = useState([]);
   const [orders, setOrders]     = useState([]);
+  const [appts, setAppts]       = useState([]);
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
+  const [confirmingId, setConfirmingId] = useState(null); // { id, type }
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -31,6 +36,9 @@ export default function Admin() {
       } else if (tab === 'orders') {
         const r = await adminOrders({ limit: 100 });
         setOrders(r.data.rows || []);
+      } else if (tab === 'appointments') {
+        const r = await adminAppointments({ limit: 200 });
+        setAppts(r.data.rows || []);
       }
     } catch (e) {
       if (e.response?.status === 401) {
@@ -77,6 +85,43 @@ export default function Admin() {
     } catch { toast.error('Update failed'); }
   };
 
+  const updateApptStatus = async (id, status) => {
+    try {
+      await updateAppointment(id, { status });
+      setAppts(a => a.map(x => x.id === id ? { ...x, status } : x));
+      if (status === 'confirmed') toast.success('✅ Confirmed — slot locked!');
+      else if (status === 'cancelled') toast.success('❌ Cancelled — slot unlocked');
+      else toast.success('Updated');
+    } catch { toast.error('Update failed'); }
+  };
+
+  const deleteAppt = async (id) => {
+    try {
+      await deleteAppointment(id);
+      setAppts(a => a.filter(x => x.id !== id));
+      setConfirmingId(null);
+      toast.success('Appointment deleted');
+    } catch { toast.error('Delete failed'); }
+  };
+
+  const deleteLead = async (id) => {
+    try {
+      await deleteConsultation(id);
+      setLeads(l => l.filter(x => x.id !== id));
+      setConfirmingId(null);
+      toast.success('Lead deleted');
+    } catch { toast.error('Delete failed'); }
+  };
+
+  const deleteOrderItem = async (id) => {
+    try {
+      await deleteOrder(id);
+      setOrders(o => o.filter(x => x.id !== id));
+      setConfirmingId(null);
+      toast.success('Order deleted');
+    } catch { toast.error('Delete failed'); }
+  };
+
   // ── Login screen ────────────────────────────────────────────────────────────
   if (!authed) {
     return (
@@ -110,9 +155,10 @@ export default function Admin() {
         <div className={styles.sidebarLogo}><img src="/logo.png" alt="Astro With Hrishi" className={styles.logoImg} /></div>
         <nav className={styles.sidebarNav}>
           {[
-            ['stats',  '📊', 'Dashboard'],
-            ['leads',  '📋', 'Leads'],
-            ['orders', '📦', 'Orders'],
+            ['stats',        '📊', 'Dashboard'],
+            ['appointments', '📅', 'Appointments'],
+            ['leads',        '📋', 'Leads'],
+            ['orders',       '📦', 'Orders'],
           ].map(([id, icon, label]) => (
             <button
               key={id}
@@ -133,7 +179,10 @@ export default function Admin() {
       <main className={styles.main}>
         <div className={styles.topBar}>
           <h2 className={styles.pageTitle}>
-            {tab === 'stats' ? '📊 Dashboard' : tab === 'leads' ? '📋 Consultation Leads' : '📦 Orders'}
+            {tab === 'stats' ? '📊 Dashboard'
+              : tab === 'appointments' ? '📅 Appointments'
+              : tab === 'leads' ? '📋 Consultation Leads'
+              : '📦 Orders'}
           </h2>
           <button className={styles.refreshBtn} onClick={load} disabled={loading}>
             {loading ? '...' : '↻ Refresh'}
@@ -154,12 +203,16 @@ export default function Admin() {
         {tab === 'stats' && !loading && stats && (
           <div className={styles.statsGrid}>
             {[
-              ['📋', 'Total Leads',     stats.consultations],
-              ['🔔', 'New Leads',       stats.newLeads],
-              ['📅', "Today's Leads",   stats.todayLeads],
-              ['📦', 'Total Orders',    stats.orders],
-              ['🛒', "Today's Orders",  stats.todayOrders],
-              ['💰', 'Confirmed Rev.',  `₹${Number(stats.revenue || 0).toLocaleString()}`],
+              ['📋', 'Total Leads',        stats.consultations],
+              ['🔔', 'New Leads',          stats.newLeads],
+              ['📅', "Today's Leads",      stats.todayLeads],
+              ['📦', 'Total Orders',       stats.orders],
+              ['🛒', "Today's Orders",     stats.todayOrders],
+              ['💰', 'Confirmed Rev.',     `₹${Number(stats.revenue || 0).toLocaleString()}`],
+              ['🗓️', 'Total Appointments', stats.totalAppts ?? 0],
+              ['⏳', 'Pending Appts',      stats.pendingAppts ?? 0],
+              ['✅', 'Confirmed Appts',    stats.confirmedAppts ?? 0],
+              ['📆', "Today's Appts",      stats.todayAppts ?? 0],
             ].map(([icon, label, val]) => (
               <div key={label} className={styles.statCard}>
                 <span className={styles.statIcon}>{icon}</span>
@@ -169,6 +222,70 @@ export default function Admin() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* ── APPOINTMENTS ── */}
+        {tab === 'appointments' && !loading && (
+          <div className={styles.tableWrap}>
+            {appts.length === 0 ? (
+              <div className={styles.empty}>No appointments yet.</div>
+            ) : (
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>#</th><th>Name</th><th>Phone</th>
+                    <th>Date</th><th>Time</th><th>Status</th>
+                    <th>Booked At</th><th>Action</th><th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {appts.map(a => (
+                    <tr key={a.id} style={a.status === 'cancelled' ? { opacity: 0.5 } : {}}>
+                      <td className={styles.idCell}>{a.id}</td>
+                      <td><strong>{a.name}</strong></td>
+                      <td><a href={`tel:${a.phone}`} className={styles.phoneLink}>{a.phone || '—'}</a></td>
+                      <td><strong>{a.appt_date}</strong></td>
+                      <td><span style={{ fontWeight: 700, color: '#D4AF37' }}>{a.appt_time}</span></td>
+                      <td>
+                        <span className={styles.statusBadge} style={{
+                          background: (STATUS_COLORS[a.status] || '#888') + '22',
+                          color: STATUS_COLORS[a.status] || '#888',
+                          border: `1px solid ${(STATUS_COLORS[a.status] || '#888')}55`,
+                        }}>
+                          {a.status === 'confirmed' ? '🔒 ' : a.status === 'cancelled' ? '✖ ' : '⏳ '}
+                          {a.status}
+                        </span>
+                      </td>
+                      <td className={styles.dateCell}>
+                        {new Date(a.created_at).toLocaleDateString('en-IN')}
+                      </td>
+                      <td>
+                        <select
+                          className={styles.statusSelect}
+                          value={a.status}
+                          onChange={e => updateApptStatus(a.id, e.target.value)}
+                        >
+                          <option value="pending">⏳ Pending</option>
+                          <option value="confirmed">✅ Confirm &amp; Lock Slot</option>
+                          <option value="cancelled">❌ Cancel &amp; Unlock</option>
+                        </select>
+                      </td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        {confirmingId === `appt-${a.id}` ? (
+                          <span style={{ display: 'flex', gap: 4 }}>
+                            <button onClick={() => deleteAppt(a.id)} style={{ background: '#e74c3c', border: 'none', color: '#fff', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', fontSize: '0.72rem' }}>✓ Yes, Delete</button>
+                            <button onClick={() => setConfirmingId(null)} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #555', color: '#aaa', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', fontSize: '0.72rem' }}>✕ Cancel</button>
+                          </span>
+                        ) : (
+                          <button onClick={() => setConfirmingId(`appt-${a.id}`)} style={{ background: 'rgba(231,76,60,0.15)', border: '1px solid #e74c3c88', color: '#e74c3c', borderRadius: 8, padding: '5px 10px', cursor: 'pointer', fontSize: '0.75rem' }}>🗑️ Delete</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
 
@@ -182,7 +299,7 @@ export default function Admin() {
                 <thead>
                   <tr>
                     <th>#</th><th>Name</th><th>Phone</th>
-                    <th>Problem</th><th>Status</th><th>Date</th><th>Update</th>
+                    <th>Problem</th><th>Status</th><th>Date</th><th>Update</th><th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -217,6 +334,16 @@ export default function Admin() {
                           <option value="closed">Closed</option>
                         </select>
                       </td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        {confirmingId === `lead-${l.id}` ? (
+                          <span style={{ display: 'flex', gap: 4 }}>
+                            <button onClick={() => deleteLead(l.id)} style={{ background: '#e74c3c', border: 'none', color: '#fff', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', fontSize: '0.72rem' }}>✓ Yes, Delete</button>
+                            <button onClick={() => setConfirmingId(null)} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #555', color: '#aaa', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', fontSize: '0.72rem' }}>✕ Cancel</button>
+                          </span>
+                        ) : (
+                          <button onClick={() => setConfirmingId(`lead-${l.id}`)} style={{ background: 'rgba(231,76,60,0.15)', border: '1px solid #e74c3c88', color: '#e74c3c', borderRadius: 8, padding: '5px 10px', cursor: 'pointer', fontSize: '0.75rem' }}>🗑️ Delete</button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -235,7 +362,7 @@ export default function Admin() {
                 <thead>
                   <tr>
                     <th>#</th><th>Name</th><th>Phone</th>
-                    <th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Update</th>
+                    <th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Update</th><th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -275,6 +402,16 @@ export default function Admin() {
                           <option value="shipped">Shipped</option>
                           <option value="delivered">Delivered</option>
                         </select>
+                      </td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        {confirmingId === `order-${o.id}` ? (
+                          <span style={{ display: 'flex', gap: 4 }}>
+                            <button onClick={() => deleteOrderItem(o.id)} style={{ background: '#e74c3c', border: 'none', color: '#fff', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', fontSize: '0.72rem' }}>✓ Yes, Delete</button>
+                            <button onClick={() => setConfirmingId(null)} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid #555', color: '#aaa', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', fontSize: '0.72rem' }}>✕ Cancel</button>
+                          </span>
+                        ) : (
+                          <button onClick={() => setConfirmingId(`order-${o.id}`)} style={{ background: 'rgba(231,76,60,0.15)', border: '1px solid #e74c3c88', color: '#e74c3c', borderRadius: 8, padding: '5px 10px', cursor: 'pointer', fontSize: '0.75rem' }}>🗑️ Delete</button>
+                        )}
                       </td>
                     </tr>
                   ))}

@@ -56,7 +56,7 @@ export default function ConsultForm() {
             <h3>Namaste! We received your request.</h3>
             <p>Our astrologer will contact you within 30 minutes on the number you provided.</p>
             <a
-              href={`https://wa.me/918799534254?text=Namaste!%20My%20name%20is%20${encodeURIComponent(form.name)}%20and%20I%20need%20guidance%20about%20${encodeURIComponent(form.problem)}`}
+              href={`https://wa.me/919558569555?text=Namaste!%20My%20name%20is%20${encodeURIComponent(form.name)}%20and%20I%20need%20guidance%20about%20${encodeURIComponent(form.problem)}`}
               className="btn-primary" target="_blank" rel="noreferrer"
             >
               💬 Chat on WhatsApp Now

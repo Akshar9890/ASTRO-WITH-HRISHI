@@ -53,6 +53,20 @@ async function getDb() {
     )
   `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS appointments (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      name       TEXT NOT NULL,
+      phone      TEXT NOT NULL DEFAULT '',
+      service    TEXT NOT NULL DEFAULT 'General Consultation',
+      appt_date  TEXT NOT NULL,
+      appt_time  TEXT NOT NULL,
+      status     TEXT NOT NULL DEFAULT 'pending',
+      notes      TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+    )
+  `);
+
   dbReady = true;
   _persist();
   console.log('[DB] SQLite ready →', DB_PATH);

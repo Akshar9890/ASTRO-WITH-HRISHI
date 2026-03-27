@@ -51,7 +51,7 @@ export default function Hero() {
         <p className={styles.sub}>100% Result-Oriented Astrology · Numerology · Life Coaching</p>
 
         <div className={styles.btns}>
-          <a href="https://wa.me/918799534254?text=Namaste!%20I%20want%20an%20astrology%20consultation"
+          <a href="https://wa.me/919558569555?text=Namaste!%20I%20want%20an%20astrology%20consultation"
              className="btn-primary" target="_blank" rel="noreferrer">
             💬 WhatsApp Now
           </a>

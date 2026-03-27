@@ -20,6 +20,7 @@ export default function Navbar() {
     { href: '#services',     label: 'Services' },
     { href: '#shop',         label: 'Sacred Shop' },
     { href: '#testimonials', label: 'Testimonials' },
+    { href: '#location',     label: 'Location' },
     { href: '#contact',      label: 'Consult Now', cta: true },
   ];
 
