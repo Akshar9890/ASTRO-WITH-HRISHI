@@ -3,6 +3,15 @@
   command = "npm run build"
   publish = "../backend/public"
 
+# ── Proxy all /api/* requests to your deployed backend ──────────────────────
+# IMPORTANT: Replace the URL below with your actual backend URL (Render/Railway/etc.)
+[[redirects]]
+  from   = "/api/*"
+  to     = "https://YOUR-BACKEND-URL.onrender.com/api/:splat"
+  status = 200
+  force  = true
+
+# ── SPA fallback — must be LAST ─────────────────────────────────────────────
 [[redirects]]
   from   = "/*"
   to     = "/index.html"
