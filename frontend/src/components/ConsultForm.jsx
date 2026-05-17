@@ -64,19 +64,29 @@ export default function ConsultForm() {
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
-            {[
-              { id: 'name',  label: 'Your Name',     type: 'text', placeholder: 'Enter your full name' },
-              { id: 'phone', label: 'Phone Number',   type: 'tel',  placeholder: '+91 XXXXX XXXXX' },
-            ].map(f => (
-              <div key={f.id} className={styles.group}>
-                <label htmlFor={f.id}>{f.label}</label>
-                <input
-                  id={f.id} type={f.type} placeholder={f.placeholder}
-                  value={form[f.id]}
-                  onChange={e => setForm(p => ({ ...p, [f.id]: e.target.value }))}
-                />
-              </div>
-            ))}
+            <div className={styles.group}>
+              <label htmlFor="name">Your Name</label>
+              <input
+                id="name" type="text" placeholder="Enter your full name"
+                value={form.name}
+                onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+              />
+            </div>
+            <div className={styles.group}>
+              <label htmlFor="phone">Phone Number</label>
+              <input
+                id="phone" type="tel" inputMode="numeric" pattern="[0-9]*"
+                placeholder="10-digit phone number"
+                value={form.phone}
+                onChange={e => {
+                  const digits = e.target.value.replace(/\D/g, '');
+                  setForm(p => ({ ...p, phone: digits }));
+                }}
+                onKeyDown={e => {
+                  if (e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault();
+                }}
+              />
+            </div>
             <div className={styles.group}>
               <label htmlFor="problem">Problem Area</label>
               <select

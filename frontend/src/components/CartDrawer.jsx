@@ -1,33 +1,50 @@
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { placeOrder } from '../api/client';
 import toast from 'react-hot-toast';
 import styles from './CartDrawer.module.css';
 
 export default function CartDrawer() {
   const { items, remove, update, clear, total, open, setOpen } = useCart();
-  const [step, setStep]     = useState('cart');   // cart | checkout | success
-  const [loading, setLoading] = useState(false);
+  const [step, setStep]     = useState('cart');   // cart | checkout
   const [form, setForm]     = useState({ name: '', phone: '', address: '' });
-  const [orderId, setOrderId] = useState(null);
 
-  const handleOrder = async () => {
+  const WHATSAPP_NUMBER = '919558569555'; // Hrishi's WhatsApp
+
+  const handlePhoneInput = (e) => {
+    const digits = e.target.value.replace(/\D/g, '');
+    setForm(p => ({ ...p, phone: digits }));
+  };
+
+  const handleOrder = () => {
     if (!form.name || !form.phone || !form.address)
       return toast.error('Please fill all fields');
-    setLoading(true);
-    try {
-      const res = await placeOrder({
-        ...form,
-        items: items.map(i => ({ product: i.name, qty: i.qty, price: i.price })),
-      });
-      setOrderId(res.data.orderId);
-      clear();
-      setStep('success');
-    } catch (e) {
-      toast.error(e.response?.data?.error || 'Order failed. Try again.');
-    } finally {
-      setLoading(false);
-    }
+    if (!/^\d{10,15}$/.test(form.phone))
+      return toast.error('Please enter a valid phone number (digits only)');
+
+    // Build WhatsApp message with order details
+    const itemLines = items.map(i => `• ${i.name} × ${i.qty} — ₹${(i.price * i.qty).toLocaleString()}`).join('\n');
+    const message = [
+      `🙏 *New Order — Astro With Hrishi*`,
+      ``,
+      `*Items:*`,
+      itemLines,
+      ``,
+      `*Total: ₹${total.toLocaleString()}*`,
+      ``,
+      `*Customer Details:*`,
+      `👤 Name: ${form.name}`,
+      `📞 Phone: ${form.phone}`,
+      `📍 Address: ${form.address}`,
+      ``,
+      `Please confirm my order and share the payment details. 🙏`,
+    ].join('\n');
+
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+
+    clear();
+    toast.success('Redirecting to WhatsApp…');
+    close();
   };
 
   const close = () => { setOpen(false); setTimeout(() => setStep('cart'), 400); };
@@ -94,40 +111,49 @@ export default function CartDrawer() {
                 <span>Total</span><span>₹{total.toLocaleString()}</span>
               </div>
             </div>
-            {['name','phone','address'].map(f => (
-              <div key={f} className={styles.field}>
-                <label>{f.charAt(0).toUpperCase() + f.slice(1)}</label>
-                <input
-                  type={f === 'phone' ? 'tel' : 'text'}
-                  placeholder={f === 'address' ? 'Full delivery address' : ''}
-                  value={form[f]}
-                  onChange={e => setForm(p => ({ ...p, [f]: e.target.value }))}
-                />
-              </div>
-            ))}
+            <div className={styles.field}>
+              <label>Name</label>
+              <input
+                type="text"
+                placeholder="Your full name"
+                value={form.name}
+                onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+              />
+            </div>
+            <div className={styles.field}>
+              <label>Phone</label>
+              <input
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="10-digit phone number"
+                value={form.phone}
+                onChange={handlePhoneInput}
+                onKeyDown={e => {
+                  // Allow control keys but block letters
+                  if (e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault();
+                }}
+              />
+            </div>
+            <div className={styles.field}>
+              <label>Address</label>
+              <input
+                type="text"
+                placeholder="Full delivery address"
+                value={form.address}
+                onChange={e => setForm(p => ({ ...p, address: e.target.value }))}
+              />
+            </div>
             <div className={styles.checkoutBtns}>
               <button className="btn-outline" onClick={() => setStep('cart')}>← Back</button>
-              <button className="btn-gold" onClick={handleOrder} disabled={loading}>
-                {loading ? 'Placing...' : '✦ Place Order'}
+              <button className="btn-gold" onClick={handleOrder}>
+                💬 Order on WhatsApp
               </button>
             </div>
           </div>
         )}
 
-        {step === 'success' && (
-          <div className={styles.success}>
-            <span>✦</span>
-            <h3>Order #{orderId} Confirmed!</h3>
-            <p>We'll contact you on WhatsApp to confirm delivery details.</p>
-            <a
-              href={`https://wa.me/919558569555?text=Hi!%20My%20order%20ID%20is%20%23${orderId}`}
-              className="btn-primary" target="_blank" rel="noreferrer"
-            >
-              💬 Chat on WhatsApp
-            </a>
-            <button className={styles.closeBtn} onClick={close}>Close</button>
-          </div>
-        )}
+
       </div>
     </div>
   );
